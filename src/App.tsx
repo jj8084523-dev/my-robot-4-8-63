@@ -43,6 +43,8 @@ import AdminAchievements from "./pages/Admin/Achievements";
 import AdminEvents from "./pages/Admin/Events";
 import AdminCoordinators from "./pages/Admin/Coordinators";
 import AdminReports from "./pages/Admin/Reports";
+import AdminProfile from "./pages/Admin/Profile";
+import AdminSettings from "./pages/Admin/Settings";
 
 const queryClient = new QueryClient();
 
@@ -92,6 +94,8 @@ const App = () => (
           <Route path="/admin/events" element={<AdminEvents />} />
           <Route path="/admin/coordinators" element={<AdminCoordinators />} />
           <Route path="/admin/reports" element={<AdminReports />} />
+          <Route path="/admin/profile" element={<AdminProfile />} />
+          <Route path="/admin/settings" element={<AdminSettings />} />
           
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

@@ -1,8 +1,9 @@
 
 import { ReactNode, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Menu, X, ChevronLeft, ChevronRight, ChevronDown, Home, Calendar, Users, Settings, Bell } from "lucide-react";
 import NotificationCenter from "@/components/admin/NotificationCenter";
+import { useAuth } from "@/contexts/AuthContext";
 
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -24,6 +25,13 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isRTL, setIsRTL] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
 
   const toggleDirection = () => {
     setIsRTL(!isRTL);
@@ -261,18 +269,25 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                       </Avatar>
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
+                  <DropdownMenuContent align="end" className="w-56 bg-white border shadow-lg">
                     <DropdownMenuLabel>My Account</DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem>
-                      <Link to="/admin/profile" className="w-full">Profile</Link>
+                    <DropdownMenuItem asChild>
+                      <Link to="/admin/profile" className="w-full cursor-pointer">
+                        Profile
+                      </Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <Link to="/admin/settings" className="w-full">Settings</Link>
+                    <DropdownMenuItem asChild>
+                      <Link to="/admin/settings" className="w-full cursor-pointer">
+                        Settings
+                      </Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem>
-                      <Link to="/auth/login" className="w-full">Log out</Link>
+                    <DropdownMenuItem 
+                      onClick={handleLogout}
+                      className="w-full cursor-pointer text-red-600 focus:text-red-600"
+                    >
+                      Log out
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
