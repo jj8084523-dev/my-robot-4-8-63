@@ -264,7 +264,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="relative h-10 w-10 rounded-full">
                       <Avatar>
-                        <AvatarImage src="https://github.com/shadcn.png" alt="Admin" />
+                        <AvatarImage src="https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?auto=format&fit=crop&w=400&h=400" alt="Admin" />
                         <AvatarFallback>AD</AvatarFallback>
                       </Avatar>
                     </Button>

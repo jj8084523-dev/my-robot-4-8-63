@@ -1,3 +1,4 @@
+import { useState } from "react";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -5,11 +6,44 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useAuth } from "@/contexts/AuthContext";
-import { User, Mail, Phone, Calendar, Shield } from "lucide-react";
+import { User, Mail, Phone, Calendar, Shield, Camera, Upload } from "lucide-react";
+import { toast } from "sonner";
 
 const AdminProfile = () => {
   const { user } = useAuth();
+  const [profileImage, setProfileImage] = useState("https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?auto=format&fit=crop&w=400&h=400");
+  const [isPhotoDialogOpen, setIsPhotoDialogOpen] = useState(false);
+
+  // Predefined photo options using the placeholder images from context
+  const photoOptions = [
+    "https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?auto=format&fit=crop&w=400&h=400", // Professional man
+    "https://images.unsplash.com/photo-1649972904349-6e44c42644a7?auto=format&fit=crop&w=400&h=400", // Woman with laptop
+    "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=400&h=400", // Woman in white shirt
+    "https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?auto=format&fit=crop&w=400&h=400", // Code on monitor
+    "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=400&h=400", // MacBook with code
+  ];
+
+  const handlePhotoSelect = (photoUrl: string) => {
+    setProfileImage(photoUrl);
+    setIsPhotoDialogOpen(false);
+    toast.success("Profile photo updated successfully!");
+  };
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const result = e.target?.result as string;
+        setProfileImage(result);
+        setIsPhotoDialogOpen(false);
+        toast.success("Profile photo uploaded successfully!");
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   return (
     <DashboardLayout>
@@ -22,11 +56,77 @@ const AdminProfile = () => {
           {/* Profile Card */}
           <Card className="lg:col-span-1">
             <CardHeader className="text-center pb-3">
-              <div className="flex justify-center mb-4">
+              <div className="flex justify-center mb-4 relative">
                 <Avatar className="w-24 h-24">
-                  <AvatarImage src="https://github.com/shadcn.png" alt="Admin" />
+                  <AvatarImage src={profileImage} alt="Admin" />
                   <AvatarFallback className="text-2xl">AD</AvatarFallback>
                 </Avatar>
+                
+                {/* Photo Change Button */}
+                <Dialog open={isPhotoDialogOpen} onOpenChange={setIsPhotoDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button 
+                      size="sm" 
+                      className="absolute -bottom-2 -right-2 rounded-full w-8 h-8 p-0 bg-myrobot-orange hover:bg-myrobot-orange/90"
+                    >
+                      <Camera className="w-4 h-4 text-white" />
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-md">
+                    <DialogHeader>
+                      <DialogTitle>Change Profile Photo</DialogTitle>
+                    </DialogHeader>
+                    
+                    <div className="space-y-4">
+                      {/* File Upload Option */}
+                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                        <Upload className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+                        <p className="text-sm text-gray-600 mb-3">Upload your own photo</p>
+                        <label htmlFor="photo-upload" className="cursor-pointer">
+                          <Button variant="outline" className="btn-outline" asChild>
+                            <span>Choose File</span>
+                          </Button>
+                          <Input
+                            id="photo-upload"
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={handleFileUpload}
+                          />
+                        </label>
+                      </div>
+                      
+                      {/* Predefined Photo Options */}
+                      <div>
+                        <p className="text-sm font-medium mb-3">Or choose from preset photos:</p>
+                        <div className="grid grid-cols-3 gap-3">
+                          {photoOptions.map((photo, index) => (
+                            <button
+                              key={index}
+                              onClick={() => handlePhotoSelect(photo)}
+                              className={`relative rounded-lg overflow-hidden border-2 transition-all hover:border-myrobot-orange ${
+                                profileImage === photo ? 'border-myrobot-orange' : 'border-gray-200'
+                              }`}
+                            >
+                              <img 
+                                src={photo} 
+                                alt={`Option ${index + 1}`} 
+                                className="w-full h-16 object-cover"
+                              />
+                              {profileImage === photo && (
+                                <div className="absolute inset-0 bg-myrobot-orange/20 flex items-center justify-center">
+                                  <div className="w-4 h-4 bg-myrobot-orange rounded-full flex items-center justify-center">
+                                    <div className="w-2 h-2 bg-white rounded-full"></div>
+                                  </div>
+                                </div>
+                              )}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
               </div>
               <CardTitle className="text-xl">{user?.name || 'Admin User'}</CardTitle>
               <div className="flex justify-center">
