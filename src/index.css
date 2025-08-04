@@ -1,0 +1,107 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Fredoka:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 25 100% 97%;
+    --foreground: 220 13% 18%;
+
+    --card: 25 100% 97%;
+    --card-foreground: 220 13% 18%;
+
+    --popover: 25 100% 97%;
+    --popover-foreground: 220 13% 18%;
+
+    --primary: 213 48% 25%;
+    --primary-foreground: 25 100% 97%;
+
+    --secondary: 210 11% 48%;
+    --secondary-foreground: 25 100% 97%;
+
+    --muted: 210 11% 90%;
+    --muted-foreground: 210 11% 48%;
+
+    --accent: 26 100% 63%;
+    --accent-foreground: 220 13% 18%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 25 100% 97%;
+
+    --border: 213 48% 25% / 0.2;
+    --input: 213 48% 25% / 0.2;
+    --ring: 26 100% 63%;
+
+    --radius: 1rem;
+
+    --sidebar-background: 213 48% 25%;
+    --sidebar-foreground: 25 100% 97%;
+    --sidebar-primary: 26 100% 63%;
+    --sidebar-primary-foreground: 220 13% 18%;
+    --sidebar-accent: 213 48% 30%;
+    --sidebar-accent-foreground: 25 100% 97%;
+    --sidebar-border: 213 48% 30%;
+    --sidebar-ring: 26 100% 63%;
+  }
+
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply bg-myrobot-white text-myrobot-charcoal font-poppins;
+  }
+}
+
+@layer components {
+  .gradient-bg {
+    @apply bg-gradient-to-br from-myrobot-navy to-myrobot-navy/80;
+  }
+  
+  .gradient-text {
+    @apply text-transparent bg-clip-text bg-gradient-to-r from-myrobot-orange to-myrobot-mint;
+  }
+  
+  .nav-link {
+    @apply px-4 py-2 rounded-md transition-all duration-300 hover:text-myrobot-orange font-medium;
+  }
+  
+  .nav-link.active {
+    @apply text-myrobot-orange;
+  }
+  
+  .btn-primary {
+    @apply bg-myrobot-orange text-white font-medium px-6 py-3 rounded-full transition-all hover:bg-myrobot-orange/90 hover:shadow-lg;
+  }
+  
+  .btn-secondary {
+    @apply bg-myrobot-navy text-white font-medium px-6 py-3 rounded-full transition-all hover:bg-myrobot-navy/90 hover:shadow-lg;
+  }
+
+  .btn-outline {
+    @apply border-2 border-myrobot-orange text-myrobot-orange font-medium px-6 py-2.5 rounded-full transition-all hover:bg-myrobot-orange/10;
+  }
+  
+  .section-title {
+    @apply text-3xl md:text-4xl font-bold mb-6 text-myrobot-navy;
+  }
+  
+  .card {
+    @apply bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition-shadow duration-300;
+  }
+  
+  .program-card {
+    @apply card border-l-4 border-myrobot-orange;
+  }
+  
+  .floating-element {
+    @apply animate-float;
+  }
+
+  .pulse-element {
+    @apply animate-pulse-light;
+  }
+}
