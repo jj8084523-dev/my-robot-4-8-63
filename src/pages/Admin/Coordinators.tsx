@@ -7,9 +7,21 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Plus, Edit2, Trash2, Users, BookOpen } from "lucide-react";
 import { toast } from "sonner";
 import { getUsers, addUser, updateUser, deleteUser, User, getCourses } from "@/lib/localStorage";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+
+// Form schema for coordinator creation
+const coordinatorFormSchema = z.object({
+  name: z.string().min(2, { message: "Name must be at least 2 characters" }),
+  email: z.string().email({ message: "Please enter a valid email address" }),
+  password: z.string().min(6, { message: "Password must be at least 6 characters" }),
+  courseIds: z.array(z.string()).optional(),
+});
 
 const AdminCoordinators = () => {
   const [coordinators, setCoordinators] = useState<User[]>(
@@ -18,63 +30,53 @@ const AdminCoordinators = () => {
   const [courses] = useState(getCourses());
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editingCoordinator, setEditingCoordinator] = useState<User | null>(null);
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
-    courseIds: [] as string[],
-  });
 
-  const resetForm = () => {
-    setFormData({
+  const form = useForm<z.infer<typeof coordinatorFormSchema>>({
+    resolver: zodResolver(coordinatorFormSchema),
+    defaultValues: {
       name: "",
       email: "",
       password: "",
       courseIds: [],
-    });
-  };
+    },
+  });
 
-  const handleSubmit = () => {
-    if (!formData.name || !formData.email || !formData.password) {
-      toast.error("Please fill in all required fields");
-      return;
-    }
-
+  const onSubmit = (values: z.infer<typeof coordinatorFormSchema>) => {
     if (editingCoordinator) {
       updateUser(editingCoordinator.id, {
-        name: formData.name,
-        email: formData.email,
-        password: formData.password,
-        courseIds: formData.courseIds,
+        name: values.name,
+        email: values.email,
+        password: values.password,
+        courseIds: values.courseIds || [],
       });
       toast.success("Coordinator updated successfully!");
       setEditingCoordinator(null);
     } else {
       // Check if email already exists
       const existingUsers = getUsers();
-      if (existingUsers.some(user => user.email === formData.email)) {
+      if (existingUsers.some(user => user.email === values.email)) {
         toast.error("Email already exists!");
         return;
       }
 
       addUser({
-        name: formData.name,
-        email: formData.email,
-        password: formData.password,
+        name: values.name,
+        email: values.email,
+        password: values.password,
         role: 'coordinator',
-        courseIds: formData.courseIds,
+        courseIds: values.courseIds || [],
       });
       toast.success("Coordinator added successfully!");
       setIsAddDialogOpen(false);
     }
 
     setCoordinators(getUsers().filter(user => user.role === 'coordinator'));
-    resetForm();
+    form.reset();
   };
 
   const handleEdit = (coordinator: User) => {
     setEditingCoordinator(coordinator);
-    setFormData({
+    form.reset({
       name: coordinator.name,
       email: coordinator.email,
       password: coordinator.password,
@@ -88,89 +90,101 @@ const AdminCoordinators = () => {
     toast.success("Coordinator deleted successfully!");
   };
 
-  const handleCourseToggle = (courseId: string, checked: boolean) => {
-    if (checked) {
-      setFormData({
-        ...formData,
-        courseIds: [...formData.courseIds, courseId]
-      });
-    } else {
-      setFormData({
-        ...formData,
-        courseIds: formData.courseIds.filter(id => id !== courseId)
-      });
-    }
-  };
-
   const getCoordinatorCourses = (courseIds: string[] = []) => {
     return courses.filter(course => courseIds.includes(course.id));
   };
 
   const CoordinatorForm = () => (
-    <div className="space-y-4">
-      <div>
-        <Label htmlFor="name">Full Name *</Label>
-        <Input
-          id="name"
-          value={formData.name}
-          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          placeholder="Enter coordinator's full name"
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Full Name *</FormLabel>
+              <FormControl>
+                <Input placeholder="Enter coordinator's full name" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-      </div>
-      
-      <div>
-        <Label htmlFor="email">Email *</Label>
-        <Input
-          id="email"
-          type="email"
-          value={formData.email}
-          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-          placeholder="Enter email address"
+        
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email *</FormLabel>
+              <FormControl>
+                <Input type="email" placeholder="Enter email address" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-      </div>
-      
-      <div>
-        <Label htmlFor="password">Password *</Label>
-        <Input
-          id="password"
-          type="password"
-          value={formData.password}
-          onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-          placeholder="Enter password"
+        
+        <FormField
+          control={form.control}
+          name="password"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Password *</FormLabel>
+              <FormControl>
+                <Input type="password" placeholder="Enter password" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-      </div>
-      
-      <div>
-        <Label>Assigned Courses</Label>
-        <div className="space-y-2 mt-2 max-h-40 overflow-y-auto">
-          {courses.map((course) => (
-            <div key={course.id} className="flex items-center space-x-2">
-              <Checkbox
-                id={course.id}
-                checked={formData.courseIds.includes(course.id)}
-                onCheckedChange={(checked) => handleCourseToggle(course.id, checked as boolean)}
-              />
-              <Label htmlFor={course.id} className="text-sm">
-                {course.name} - {course.level}
-              </Label>
-            </div>
-          ))}
+        
+        <FormField
+          control={form.control}
+          name="courseIds"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Assigned Courses</FormLabel>
+              <div className="space-y-2 mt-2 max-h-40 overflow-y-auto">
+                {courses.map((course) => (
+                  <div key={course.id} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={course.id}
+                      checked={field.value?.includes(course.id) || false}
+                      onCheckedChange={(checked) => {
+                        const currentIds = field.value || [];
+                        if (checked) {
+                          field.onChange([...currentIds, course.id]);
+                        } else {
+                          field.onChange(currentIds.filter(id => id !== course.id));
+                        }
+                      }}
+                    />
+                    <Label htmlFor={course.id} className="text-sm">
+                      {course.name} - {course.level}
+                    </Label>
+                  </div>
+                ))}
+              </div>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        
+        <div className="flex justify-end space-x-2 pt-4">
+          <Button type="button" variant="outline" onClick={() => {
+            setIsAddDialogOpen(false);
+            setEditingCoordinator(null);
+            form.reset();
+          }}>
+            Cancel
+          </Button>
+          <Button type="submit">
+            {editingCoordinator ? "Update Coordinator" : "Add Coordinator"}
+          </Button>
         </div>
-      </div>
-      
-      <div className="flex justify-end space-x-2 pt-4">
-        <Button variant="outline" onClick={() => {
-          setIsAddDialogOpen(false);
-          setEditingCoordinator(null);
-          resetForm();
-        }}>
-          Cancel
-        </Button>
-        <Button onClick={handleSubmit}>
-          {editingCoordinator ? "Update Coordinator" : "Add Coordinator"}
-        </Button>
-      </div>
-    </div>
+      </form>
+    </Form>
   );
 
   return (
@@ -276,7 +290,7 @@ const AdminCoordinators = () => {
         <Dialog open={!!editingCoordinator} onOpenChange={(open) => {
           if (!open) {
             setEditingCoordinator(null);
-            resetForm();
+            form.reset();
           }
         }}>
           <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
